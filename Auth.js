@@ -1,13 +1,14 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const router = express.Router();
-const cors = require("cors")
+const cors = require("cors");
+const bcrypt = require("bcrypt");
 
 const App = express();
 //middleware
 App.use(express.json());
 
-App.use(cors()) 
+App.use(cors());
 
 //Router defining
 
@@ -53,32 +54,38 @@ router.post("/reg", async (req, res) => {
   if (existingUser) {
     res.status(400);
     throw new Error("User already exists");
-  }
+  };
 
-  const newuser = await A.create({ name, email, password });
-  res.status(200).json({ msg: "User crated succesfully", newuser });
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+
+  const newuser = await A.create({ name, email, password: hashedPassword });
+  res.status(200).json({ msg: "User created succesfully", newuser });
 });
-
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   // Validate input
   if (!email || !password) {
     return res.status(400).json({ error: "Email and password are required" });
-  }
+  };
+
+
 
   try {
     // Check if user exists
     // console.log("Before finding in DB")
-    const user = await A.findOne({email});
+    const user = await A.findOne({ email });
 
     // If user not found or password is incorrect
-    if(!user){
-      return res.status(404).json({error:"email invalid"})
+    if (!user) {
+      return res.status(404).json({ error: "email invalid" });
     }
 
-    if (user.password !== password) {
-      return res.status(404).json({ error: "Invalid email or password" });
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordCorrect) {
+      return res.status(400).json({ error: "Invalid password" });
     }
 
     res.status(200).json({ message: "Login successful", user });
@@ -86,8 +93,6 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ error: "Error logging in" });
   }
 });
-
-
 
 App.listen(8000, () => {
   console.log("Server created succesfully");
