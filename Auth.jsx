@@ -1,7 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
 
-
 const Auth = () => {
 const [name,setName]= useState("")
 const [email,setEmail]= useState("")
@@ -20,13 +19,9 @@ const handleFormSubmit =async (e)=>{
     try {
       const result = await axios.post("http://localhost:8000/reg",{name,email,password})
        console.log("Registration Success ", result)
-
     } catch (error) {
-      console.log("Something went wrong",error);
-      
-    }
-    
-    
+      console.log("Something went wrong",error);      
+    }    
 }
   return (
     <>
@@ -34,8 +29,7 @@ const handleFormSubmit =async (e)=>{
         <div>
           <h1>Register Form</h1>
         </div>
-        <form   onSubmit={handleFormSubmit}>
-          
+        <form   onSubmit={handleFormSubmit}>        
           <input
             type="text"
             name="name"
@@ -63,5 +57,4 @@ const handleFormSubmit =async (e)=>{
     </>
   );
 };
-
 export default Auth;
